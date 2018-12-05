@@ -14,15 +14,16 @@ import numpy as np
 
 data = funcs.import_data()
 
-taus_range = np.linspace(0.1, 4, 1000)
+taus_range = np.linspace(0.1, 4, 100)
 nlls, taus = funcs.plot_NLL(taus_range, data)
+
 initial_taus = funcs.find_initial_values(nlls, taus)
 
-minimum, iterations, x3_list = funcs.parabolic_minimiser(data, initial_taus, np.finfo(float).eps)
+minimum, iterations, x3_list = funcs.parabolic_1d_minimiser(data, initial_taus, np.finfo(float).eps)
 nll_mins = []
 
-for u in x3_list:
-    val = funcs.find_NLL_value(data['t'].values, u, data['sigma'].values)
+for tau in x3_list:
+    val = funcs.find_NLL_value(data['t'].values, data['sigma'].values, tau)
     nll_mins.append(val)
     
 plt.plot(taus, nlls)

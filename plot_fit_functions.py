@@ -26,7 +26,7 @@ for t, s in zip(tau_range, sigma_range):
              label='$\sigma$= %.2f, tau=%.2f'%(s, t))
     plt.xlabel('time ($p$s)')
     plt.ylabel('f$_m$(t)')
-    plt.grid()
     plt.title('F$_m$(t) for different $\sigma$ and tau, A=800')
     plt.legend()
+    plt.grid(b=True)
     plt.show()

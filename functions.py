@@ -9,7 +9,7 @@ import numpy as np
 from scipy.special import erfc
 
 def import_data():
-    file = '/Users/sophie/Documents/Work/Year 3/Courses/Computational Physics/Project/lifetime-2018.csv'
+    file = '/Users/sophie/Documents/Work/GitHub/Year 3/Computational_Physics_Project/lifetime-2018.csv'
     # Import data as dataframe with the two columns t and sigma
     data = pd.read_csv(file, header=None).rename(columns={0: 't', 1: 'sigma'}).sort_values(by=['t'])
     return data
@@ -32,7 +32,7 @@ def cosh(x):
     return coshx
 
 
-def find_NLL_value(function, ts, sigmas, tau):
+def find_NLL_value(ts, sigmas, tau):
     
     # Initialise nll summation 
     nll = 0
@@ -43,20 +43,20 @@ def find_NLL_value(function, ts, sigmas, tau):
     return -nll
 
         
-def plot_NLL(initial_u, dataframe): #initial_u = range of tau values
+def plot_NLL(tau_range, measurements): #initial_u = range of tau values
     
     # Define fixed paramters
-    t = dataframe['t'].values
-    sigma = dataframe['sigma'].values
+    ts = measurements['t'].values
+    sigmas = measurements['sigma'].values
     
     nll_list = []
     
-    for u in initial_u:
+    for tau in tau_range:
     
-        nll = find_NLL_value(t, u, sigma)
+        nll = find_NLL_value(ts, sigmas, tau)
         nll_list.append(nll)
     
-    return nll_list, initial_u
+    return nll_list, tau_range
 
 
 def find_parabolic_x3(values, ts, sigmas):
@@ -99,7 +99,7 @@ def find_initial_values(function_values, test_values):
     Therefore limited by the spacing used to plot the NLL so will not be correct minimum
     """
     
-    min_index = np.argmax(function_values)
+    min_index = np.argmin(function_values)
     guess = test_values[min_index]
     adj = test_values[min_index+1]
     prev = test_values[min_index-1]
@@ -108,7 +108,34 @@ def find_initial_values(function_values, test_values):
     return initial_values
 
 
-def parabolic_minimiser(data, initial_guess, threshold):
+def parabolic_1d_minimiser(data, initial_guess, threshold):
+    
+    """
+    Parabolic 1D minimiser finds the minimum using the negative log likelihood
+    Stops dependant on a user-defined threshold difference
+    """
+    ts = data['t'].values
+    sigmas = data['sigma'].values
+    
+    values = initial_guess
+    # Initialise a list to keep track of x3 in order to calculate difference
+    x3_list = [0.4]
+    difference = 1.0
+    iterations = 0
+    
+    while difference > threshold:
+        x3 = find_parabolic_x3(values, ts, sigmas)
+        x3_list.append(x3)
+        difference = np.abs(x3-x3_list[-2])
+        values.append(x3)
+        values = remove_highest(values, ts, sigmas)
+        iterations+= 1
+      
+    print('Minimum Found!: ', x3)
+    return x3, iterations, x3_list
+
+
+def test_1d_minimiser(data, initial_guess, threshold):
     
     """
     Parabolic 1D minimiser finds the minimum using the negative log likelihood
