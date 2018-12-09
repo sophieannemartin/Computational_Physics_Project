@@ -3,6 +3,7 @@
 """
 Created on Wed Dec  5 12:54:05 2018
 
+TESTING 1D MINIMISER ON THE COSHX FUNCTION
 @author: sophie
 """
 

@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from scipy.special import erfc
 
+
 def import_data():
     file = '/Users/sophie/Documents/Work/GitHub/Year 3/Computational_Physics_Project/lifetime-2018.csv'
     # Import data as dataframe with the two columns t and sigma
