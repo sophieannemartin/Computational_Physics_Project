@@ -7,17 +7,33 @@ TESTING 1D MINIMISER ON THE COSHX FUNCTION
 @author: sophie
 """
 
-import functions as funcs
-import matplotlib.pyplot as plt
+import define_functions as f
 import numpy as np
 import matplotlib.pyplot as plt
+import minimiser
 
-x_range = np.linspace(-10,10, 100)
-y_values = funcs.cosh(x_range)
-
-plt.plot(x_range, y_values)
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('cosh(x)')
-plt.grid()
-plt.show()
+def main():
+    
+    x_range = np.linspace(-10,10, 100)
+    y_values = f.cosh(x_range)
+    minimum, iterations, x3_list = minimiser.minimise_1D(
+                x_range, f.cosh, np.finfo(float).eps)
+    
+    
+    x3_mins = []
+        
+    for x3 in x3_list:
+        val = f.cosh(x3)
+        x3_mins.append(val)
+            
+            
+    plt.plot(x_range, y_values)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Minimisation of cosh(x)')
+    plt.grid()
+    plt.plot(x3_list, x3_mins, '.', color='red')
+    plt.show()
+    
+if __name__ == "__main__":
+    main()

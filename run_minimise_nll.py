@@ -11,15 +11,20 @@ PLOTTING THE NLL FIT AS A FUNCTION OF TAU
 import define_functions as f
 import matplotlib.pyplot as plt
 import numpy as np
-import minimisation
+import minimiser
 
 def main():
+    
+    # Define a range of tau values to apply the minimiser over
+    # Assumes that there is a minimum within this range
+    # Will find local minimum in range
+    
     taus_range = np.linspace(0.1, 4.0, 100)
      
     decayfunction = f.DecayFunction()
     nll_values = decayfunction.get_nll_values(taus_range)
     
-    minimum, iterations, x3_list = minimisation.minimise_1D(
+    minimum, iterations, x3_list = minimiser.minimise_1D(
             taus_range, decayfunction.get_nll_values, np.finfo(float).eps)
     
     nll_mins = []
