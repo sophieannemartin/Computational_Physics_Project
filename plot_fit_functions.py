@@ -7,22 +7,23 @@ PLOT THE FT FUNCTION FOR DIFFERENT TAU AND MU VALUES
 @author: sophie
 """
 
-import functions as funcs
+import define_functions as f
 import matplotlib.pyplot as plt
 import numpy as np
 
-data = funcs.import_data()
+func = f.DecayFunction()
+ts, sigmas = func.import_data()
 
 tau_range = np.linspace(0.1,0.5, 4)
 sigma_range = np.linspace(0.1, 0.5, 4)
 
 for t, s in zip(tau_range, sigma_range):
     
-    fm = funcs.fm_function(data['t'].values, s, t)
-    area = np.trapz(fm, data['t'].values)
+    fm = func.fm_function(ts, s, t)
+    area = np.trapz(fm, ts)
     print(area)
     
-    plt.plot(data['t'], fm, 
+    plt.plot(ts, fm, 
              label='$\sigma$= %.2f, tau=%.2f'%(s, t))
     plt.xlabel('time ($p$s)')
     plt.ylabel('f$_m$(t)')
