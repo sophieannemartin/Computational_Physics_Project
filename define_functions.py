@@ -15,11 +15,6 @@ def gauss(x, *p):
     mu, sigma = p
     return np.exp(-(x-mu)**2/(2*sigma**2))
 
-# Define coshx function to be used to test the minimisation function
-def cosh(x):
-    coshx = np.cosh(x)
-    return coshx
-
 # ----------------------------------
 
 class DecayFunction:
@@ -93,6 +88,10 @@ class DecayFunction:
         val  = (a*(self.fm_function(tau))+
                 (1-a)*(self.fm_background()))
         return val
+    
+    def get_2d_nll_values(self, u1_range, u2_range):
         
+
+        return u1_range
 
 # ----------------------------------

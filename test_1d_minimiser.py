@@ -7,23 +7,32 @@ TESTING 1D MINIMISER ON THE COSHX FUNCTION
 @author: sophie
 """
 
-import define_functions as f
 import numpy as np
 import matplotlib.pyplot as plt
 import minimiser
 
+# Define coshx function to be used to test the minimisation function
+def cosh(x):
+    coshx = np.cosh(x)
+    return coshx
+
+
 def main():
     
     x_range = np.linspace(-10,10, 100)
-    y_values = f.cosh(x_range)
+    y_values = cosh(x_range)
+    
+    # Run minimisation function tp obtain value, number of iterations and
+    # list of x3 values that were obtained in the algorithm
+    
     minimum, iterations, x3_list = minimiser.minimise_1D(
-                x_range, f.cosh, np.finfo(float).eps)
+                x_range, cosh, np.finfo(float).eps)
     
     
     x3_mins = []
         
     for x3 in x3_list:
-        val = f.cosh(x3)
+        val = cosh(x3)
         x3_mins.append(val)
             
             
