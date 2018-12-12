@@ -26,7 +26,7 @@ def main():
     # list of x3 values that were obtained in the algorithm
     
     minimum, iterations, x3_list = minimiser.minimise_1D(
-                x_range, cosh, np.finfo(float).eps)
+                x_range, cosh, 100)
     
     
     x3_mins = []

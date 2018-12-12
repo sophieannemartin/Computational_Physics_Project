@@ -7,6 +7,7 @@ SOPHIE MARTIN
 import pandas as pd
 import numpy as np
 from scipy.special import erfc
+import sys
 
 # ----------------------------------
 
@@ -38,25 +39,48 @@ class DecayFunction:
         t = data['t'].values
         sigma = data['sigma'].values
         return t, sigma # These are arrays of the values
+
+    # Careful with the use of t, sigma and tau here
+    # Can define them as all t and tau values specified in the function itself
+    
+    def fm_function(self, t, sigma, tau):
+        f_m = ((1/(2*tau))*np.exp(((sigma**2)/(2*tau**2))-(t/tau))*
+               erfc((1/np.sqrt(2))*((sigma/tau) - (t/sigma))))
+        return f_m
+    
+
+    def fm_background(self, t, sigma):
+        
+        bckg = ((1/(sigma*np.sqrt(2*np.pi)))*
+                (np.exp(-0.5*((t**2)/(sigma**2)))))
+        return bckg
+    
+    
+    def signal_and_background(self, t, sigma, tau, a):
+        val  = (a*(self.fm_function(t, sigma, tau))+
+                ((1-a)*(self.fm_background(t, sigma))))
+        return val
     
     
     def get_data(self):
         return self.__t__, self.__sigma__
     
     
+# ------------------------------------
+    # Code for the NLL based on one parameter estimate
+
     def find_nll_value(self, u):
         
         # Initialise nll summation 
         nll = 0
         
         for i in range(self.__n__): # 0 to n-1 instead of 1 to n
-            nll += np.log10(self.fm_function(self.__t__[i], self.__sigma__[i], u))
+            nll += np.log(self.fm_function(self.__t__[i], self.__sigma__[i], u))
         return -nll
 
     
     def get_nll_values(self, u_range): # u_range = range of tau values
-        
-        
+  
         if type(u_range) == list:
             nll_values = []
             for u in u_range:
@@ -68,30 +92,40 @@ class DecayFunction:
     
         return nll_values
     
-    # Careful with the use of t, sigma and tau here
-    # Can define them as all t and tau values specified in the function itself
-    
-    def fm_function(self, t, sigma, tau):
-        f_m = ((1/(2*tau))*np.exp(((sigma**2)/(2*tau**2))-(t/tau))*
-               erfc((1/np.sqrt(2))*((sigma/tau) - (t/sigma))))
-        return f_m
-    
-
-    def fm_background(self):
+# ------------------------------------
         
-        bckg = ((1/(self.__sigma__**np.sqrt(2*np.pi)))*
-                np.exp(-0.5*(self.__t__**2/self.__sigma__**2)))
-        return bckg
+    # Defining the nll for two parameters u1 and u2 estimates
     
-    
-    def signal_and_background(self, a, tau):
-        val  = (a*(self.fm_function(tau))+
-                (1-a)*(self.fm_background()))
-        return val
-    
-    def get_2d_nll_values(self, u1_range, u2_range):
+    def get_2d_nll_values(self, u1_range, u2_range): 
         
-
-        return u1_range
+        # u_range = range of tau values input
+        
+        if type(u1_range) == list and type(u2_range) == list:
+            
+            nll_values = []
+            for u1, u2 in [(x,y) for x in u1_range for y in u2_range]:
+                nll = self.find_2d_nll_value(u1, u2)
+                nll_values.append(nll)
+            
+        else:
+            nll_values = self.find_2d_nll_value(u1_range, u2_range)
+    
+        return nll_values
+    
+    
+    def find_2d_nll_value(self, u1, u2):
+        
+        if u2 > 1:
+            sys.exit('invalid a')
+            
+        # Initialise nll summation 
+        nll = 0
+        
+        for i in range(self.__n__): # 0 to n-1 instead of 1 to n
+            nll += -np.log(self.signal_and_background(self.__t__[i], 
+                                                      self.__sigma__[i], u1, u2))
+        return nll
+    
+    
 
 # ----------------------------------
