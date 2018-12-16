@@ -23,8 +23,8 @@ def main():
     
     x0, y0 = 2.0,4.0
     
-    minimum, minimum_list = \
-    minimiser.minimise_quasi_newton(x0, y0, test_f, 1, np.finfo(float).eps, 0.01)
+    minimum, minimum_list, iterations = \
+    minimiser.minimise_quasi_newton(x0, y0, test_f, 1, 0.01)
 
     x_range = y_range = np.linspace(-10,10, 100)
     X, Y = np.meshgrid(x_range, y_range)

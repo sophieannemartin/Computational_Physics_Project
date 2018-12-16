@@ -6,7 +6,7 @@ SOPHIE MARTIN
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-import functions as funcs
+import define_functions as funcs
 
 func = funcs.DecayFunction()
 ts, sigmas = func.import_data()
@@ -23,37 +23,24 @@ sig_centers = 0.5*(sig_edges[1:]+sig_edges[:-1])
 widths_sig = sig_edges[1:]-sig_edges[:-1]
 error_sig = np.sqrt(sig_freq)
 
-
-# p0 is the initial guess for the fitting coefficients (t, sigma) for fm
+# p0 is the initial guess for the scipy fitting coefficients (t) for fm
 p0_f = [1, 1]
 coeff_fm, var_matrix_fm = curve_fit(func.fm_function, time_centers, time_freq, p0=p0_f)
 hist_fit_fm = func.fm_function(time_centers, *coeff_fm)
-
-# p0 is the initial guess for the fitting coefficients (mu and sigma above)
-p0 = [0, 2]
-coeff, var_matrix = curve_fit(funcs.gauss, time_centers, time_freq, p0=p0)
-mu = coeff[0]
-gausssigma = coeff[1]
-# Get the fitted curve
-hist_fit = funcs.gauss(time_centers, *coeff)
-
 
 
 # Plot distributions and gaussian/fm fit to the time spread
 fig, (ax1, ax2) = plt.subplots(2,1, figsize=(8,15))
 fig.subplots_adjust(hspace=0.5)
-ax1.bar(time_centers, time_freq, width=widths_time, color='orange',label='data')
-ax1.plot(time_centers, hist_fit, label='Gaussian Fit', lw=1, color='red')
-ax1.plot(time_centers, hist_fit_fm, label='F$_m$(t) Fit', lw=1, color='purple')
-ax1.set_ylabel('Number of entries')
-ax1.set_xlabel('Time ($p$s)')
+ax1.bar(time_centers, time_freq, width=widths_time, color='orange')
+ax1.set_ylabel('Number of entries',  fontsize=15)
+ax1.set_xlabel('Time ($p$s)',  fontsize=15)
 ax1.set_title('Histogram of times measured')
-ax1.legend()
 ax1.grid()
 
 ax2.bar(sig_centers, sig_freq, width=widths_sig, color='blue')
-ax2.set_ylabel('Number of entries')
-ax2.set_xlabel('$\sigma$ ($p$s)')
+ax2.set_ylabel('Number of entries',  fontsize=15)
+ax2.set_xlabel('$\sigma$ ($p$s)',  fontsize=15)
 ax2.set_title('Histogram of errors on times')
 ax2.grid()
 
@@ -64,12 +51,12 @@ plt.grid()
 
 plt.figure()
 plt.bar(time_centers, time_freq, width=widths_time, color='orange',label='data')
-plt.plot(time_centers, hist_fit_fm, label='F$_m$(t) Fit', lw=1, color='purple')
-plt.ylabel('Number of entries')
-plt.xlabel('$\sigma$ ($p$s)')
+plt.plot(time_centers, hist_fit_fm, label='F$^m$(t) Fit', lw=1, color='purple')
+plt.ylabel('Number of entries', fontsize=15)
+plt.xlabel('Time ($p$s)', fontsize=15)
 plt.grid()
-plt.title('Histogram of errors on times with F$_m$(t) scipy fit')
+plt.title('Histogram of times with F$^m$(t) scipy fit')
+plt.legend(prop={'size': 14})
 plt.show()
 
-print('Gauss Mean t: ', mu, 'Gauss Std dev: ', gausssigma,
-      'Fm sigma: ', coeff_fm[1], 'Fm tau: ', coeff_fm[0], 'Fm sigma: ', coeff_fm[1])
+print('Fm tau scipy fit: ', coeff_fm[1], 'Fixed resolution: ', coeff_fm[0])

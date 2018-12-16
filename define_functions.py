@@ -12,10 +12,25 @@ import sys
 # ----------------------------------
 
 # Define gaussian function to be used to fit to the data
+
 def gauss(x, *p):
     mu, sigma = p
     return np.exp(-(x-mu)**2/(2*sigma**2))
 
+# Define integration method
+    
+def integrate_simpson(a, b, function, *params, n=500):
+    
+    dx = (b-a)/n
+    x = np.linspace(a, b, n+1)
+    y = function(x, *params)
+    integral = 0
+    
+    integral = np.sum(y[:-1:2] + 4*y[1::2] + y[2::2])
+    
+    val  = (dx/3) * integral
+    return val
+    
 # ----------------------------------
 
 class DecayFunction:
@@ -23,7 +38,7 @@ class DecayFunction:
     """
     DecayFunction Object
     Class that has all the relevant function specific to the t, sigma
-    dataset such as computing the NLL, and fm, signal and background functions.
+    dataset such as computing the NLLs, and fm, signal and background functions.
     
     """
 
@@ -38,25 +53,24 @@ class DecayFunction:
         data = pd.read_csv(file, header=None).rename(columns={0: 't', 1: 'sigma'}).sort_values(by=['t'])
         t = data['t'].values
         sigma = data['sigma'].values
-        return t, sigma # These are arrays of the values
+        return t, sigma # Return arrays 
 
-    # Careful with the use of t, sigma and tau here
-    # Can define them as all t and tau values specified in the function itself
-    
     def fm_function(self, t, sigma, tau):
+        # Input parameters can be single-valued or arrays
         f_m = ((1/(2*tau))*np.exp(((sigma**2)/(2*tau**2))-(t/tau))*
                erfc((1/np.sqrt(2))*((sigma/tau) - (t/sigma))))
         return f_m
     
 
     def fm_background(self, t, sigma):
-        
+        # Defines background function
         bckg = ((1/(sigma*np.sqrt(2*np.pi)))*
                 (np.exp(-0.5*((t**2)/(sigma**2)))))
         return bckg
     
     
     def signal_and_background(self, t, sigma, tau, a):
+        # Defines the signal & background value
         val  = (a*(self.fm_function(t, sigma, tau))+
                 ((1-a)*(self.fm_background(t, sigma))))
         return val
@@ -64,8 +78,7 @@ class DecayFunction:
     
     def get_data(self):
         return self.__t__, self.__sigma__
-    
-    
+
 # ------------------------------------
     # Code for the NLL based on one parameter estimate
 

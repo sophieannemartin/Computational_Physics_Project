@@ -61,38 +61,122 @@ def find_initial_values(test_values, fvalues):
     return initial_values
 
 
-def minimise_1D(x_values, function, maxiter):
+def minimise_1D(x_values, function, maxiter=500):
     
     """
     Parabolic 1D minimiser finds the minimum using the negative log likelihood
-    Stops dependant on a user-defined iteration limit 
-    Will stop before this if the difference is less than machine accuracy
+    Stops dependant on a user-defined max number of iterations
+    Will stop before this is difference is less than the threshold value
     """
     
     fvalues = function(x_values)
     
     values = find_initial_values(x_values, fvalues)
     # Initialise a list to keep track of x3 in order to calculate difference
-    x3_list = [] # Initialise empty list  
-    difference = np.finfo(float).eps
+    x3_list = [] # Initialise empty list
     iterations = 0
+    repeat= True
     
-    while difference > np.finfo(float).eps or iterations<maxiter:
-        x3 = find_parabolic_x3(values, function)
-        x3_list.append(x3)
+    while repeat==True and iterations<maxiter:
         
-        if len(x3_list) > 1: 
-            # Once you have enough values of x3, start calculating difference
-            difference = np.abs(x3-x3_list[-1])
+        x3 = find_parabolic_x3(values, function)
+        if len(x3_list) > 0 and x3==x3_list[-1]:
+            repeat = False
+            print('Minimum Found!: ', x3)
             
-        values.append(x3)
-        values = remove_highest(values, function)
-        iterations+= 1
-      
-    print('Minimum Found!: ', x3)
+        else:
+            x3_list.append(x3)
+            values.append(x3)
+            values = remove_highest(values, function)
+            iterations+= 1
+        
+    if iterations >= maxiter:
+        print('Maximum number of iterations reached before convergence!')
+        print('Best Estimate of Minimum: ', x3)
+     
     return x3, iterations, x3_list
 
 
+def secant_root_finder(interval, function, shift=0):
+    
+    """
+    Root finder that uses the secant method.
+    Requires initial interval that must contain value at which function = 0
+    If not, then breaks.
+    
+    Can shift the initial function down by a fixed value where required 
+    to find the value of x at any f(x)-shift value
+    """
+    
+    a, b = interval[0], interval[1]
+    
+    if (function(a)-shift)*(function(b)-shift) >= 0:
+        print("Error! Incorrect interval - Secant method will fail.")
+        return None
+    
+    while np.abs(b-a) > 0.0000000000000001:
+        
+        x_m = a - (function(a)-shift)*((b-a)/((function(b)-shift)
+        -(function(a)-shift)))
+        f_x_m = function(x_m)-shift
+        
+        if (function(a)-shift)*f_x_m < 0:
+            a = a
+            b = x_m
+            
+        elif (function(b)-shift)*f_x_m < 0:
+            a = x_m
+            b = b
+            
+        elif f_x_m == 0:
+            # Exact solution found
+            print('Found exact solution!')
+            return x_m
+        
+        else:
+            print('Secant method fails')
+            return None  
+    
+
+def find_standard_deviation(minimum_pos, param_range, function):
+    
+    """
+    Calculates the standard deviation in the positive and negative direction 
+    where the function changes by 0.5
+    Takes too long, if never finds value then will break
+    """
+    
+    shift = function(minimum_pos) + 0.5
+    
+    # Define initial interval using 0.1 either side of the minimum
+    # Can see from the plot that this is sufficient in this specific case
+    
+    starting_interval = [0.3, 0.4]
+    minus = secant_root_finder(starting_interval, function, shift)
+        
+    starting_interval = [0.4, 0.5]
+    plus = secant_root_finder(starting_interval, function, shift)
+    return minus, plus
+
+
+def gauss_standard_deviation(x_list, function):
+    
+    """
+    Uses the minimum and 2 prior values to calculate an error on the minimum.
+    """
+    
+    x0 = x_list[-3]
+    x1 = x_list[-2]
+    x2 = x_list[-1]
+    
+    a0 = 1/((x0-x1)*(x0-x2))
+    a1 = 1/((x1-x0)*(x1-x2))
+    a2 = 1/((x2-x0)*(x2-x1))
+    
+    alpha = a0*function(x0) + a1*function(x1) + a2*function(x2)
+    sigma = np.sqrt(1/(2*alpha))
+    return sigma
+    
 # --------------------- 
     
 # Quasi-Newton 2D Minimiser Definition
@@ -123,28 +207,31 @@ def dfp_update(g_list, x_list, gradf_list):
                (np.dot(np.transpose(gamma_vector), (np.dot(g_list[-1],gamma_vector)))))
     return g
 
+
 def find_initial_vectorx(u1_range, u2_range, function):
     
         # Automatic selection of best initial position based on a range of values
         X, Y = np.meshgrid(u1_range, u2_range)
-        zs = np.array([function(x,y) for x,y in zip(np.ravel(u1_range), np.ravel(u2_range))]) 
+        zs = np.array([function(x,y) for x,y in zip(np.ravel(X), np.ravel(Y))]) 
         
-        for u1, u2 in zip(u1_range, u2_range):
-            z = function(u1, u2)
-            
-            if z == np.amin(zs):
+        count = 0
+        for u1, u2 in zip(np.ravel(X), np.ravel(Y)):
+            count+= 1
+            if count == np.argmin(zs):
                 initialu1, initialu2 = u1,u2
                 
         return initialu1, initialu2, zs
     
     
-def minimise_quasi_newton(x0, y0, function, h, maxiter, alpha):
+def minimise_quasi_newton(x0, y0, function, h, alpha, maxiter=100):
     
     """
     x0 and y0 are used to define the initial stating position
     alpha must be < 0.1 to work.. (why?????)
     
     x0 and y0 are initial position therefore need a starting point
+    
+    Stops based on maximum iterations to avoid blow ups
     """
     
     g_list  = []
@@ -152,10 +239,7 @@ def minimise_quasi_newton(x0, y0, function, h, maxiter, alpha):
     gradf_list = []
     
     # Create G0 and x0 to begin
-    gn = np.zeros((2,2))
-    for i in range(gn.shape[0]):
-        gn[i,i] = 1
-        
+    gn = np.array([[1,0], [0,1]])
     vector_x =  np.array([[x0], [y0]])
 
     gradf = central_difference(vector_x[0,0], vector_x[1,0], function, h)
@@ -164,29 +248,38 @@ def minimise_quasi_newton(x0, y0, function, h, maxiter, alpha):
     x_list.append(vector_x)
     gradf_list.append(gradf)
     
-    difference = np.array([[threshold], [threshold]])
+    difference = np.array([[0.00002], [0.00002]])
+    repeat = True
+    iterations = 0
     
-    while difference.all() > 0:
+    print('Minimisation start..')
+    
+    while repeat == True and iterations<maxiter:
         
-        print(vector_x)
         # Gradient at a specific x value
         vector_x = x_list[-1] - np.dot(alpha*g_list[-1], gradf_list[-1]) # Use last G and f
         # Subtraction of two vectors
-        difference = (np.around(vector_x, 12))-(np.around(x_list[-1],12)) 
-        print(difference)
+        if vector_x[0,0] == (x_list[-1])[0,0] and vector_x[1,0] == (x_list[-1])[1,0]:
+            repeat = False
         # If not minimum add to the list
-        x_list.append(vector_x)
-        gradf = central_difference(vector_x[0,0], vector_x[1,0], function, h)
-        # Update gradf (at new x, y)
-        gradf_list.append(gradf)
-        newg = dfp_update(g_list, x_list, gradf_list)
+        else:
+            x_list.append(vector_x)
+            gradf = central_difference(vector_x[0,0], vector_x[1,0], function, h)
+            # Update gradf (at new x, y)
+            gradf_list.append(gradf)
+            newg = dfp_update(g_list, x_list, gradf_list)
+            
+            # Update G (Hessian) using new x,y, and new gradf
+            g_list.append(newg)
+            iterations+=1
+            # Repeats this until minimum is found
+            
+    if iterations >= maxiter:
+        print('Maximum number of iterations reached before convergence! Deltas between last values:[%f, %f]'
+              % (difference[0,0], difference[1,0]))
+        print('Best Minimum Estimate: ', vector_x)
         
-        # TO DO - When same pair of values is obtained - define a quit regime (
-        # i.e. zero delta vector)
+    else:
+        print('Exact Minimum Found!: ', vector_x)
         
-        # Update G (Hessian) using new x,y, and new gradf
-        g_list.append(newg)
-        # Repeats this until minimum is found
-
-    print('Minimum Found!: ', vector_x)
-    return vector_x, x_list
+    return vector_x, x_list, iterations

@@ -26,7 +26,7 @@ def main():
     # list of x3 values that were obtained in the algorithm
     
     minimum, iterations, x3_list = minimiser.minimise_1D(
-                x_range, cosh, 100)
+                x_range, cosh)
     
     
     x3_mins = []
@@ -36,12 +36,13 @@ def main():
         x3_mins.append(val)
             
             
-    plt.plot(x_range, y_values)
+    plt.plot(x_range, y_values, label='cosh(x)')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('Minimisation of cosh(x)')
     plt.grid()
-    plt.plot(x3_list, x3_mins, '.', color='red')
+    plt.plot(x3_list, x3_mins, '.', color='red', label='minimum')
+    plt.legend()
     plt.show()
     
 if __name__ == "__main__":
