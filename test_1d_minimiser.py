@@ -1,9 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Wed Dec  5 12:54:05 2018
-
 TESTING 1D MINIMISER ON THE COSHX FUNCTION
+05/12/18
 @author: sophie
 """
 
@@ -37,12 +34,12 @@ def main():
             
             
     plt.plot(x_range, y_values, label='cosh(x)')
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.xlabel('x', fontsize=15)
+    plt.ylabel('y', fontsize=15)
     plt.title('Minimisation of cosh(x)')
     plt.grid()
     plt.plot(x3_list, x3_mins, '.', color='red', label='minimum')
-    plt.legend()
+    plt.legend(prop={'size':14})
     plt.show()
     
 if __name__ == "__main__":

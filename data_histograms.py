@@ -1,7 +1,7 @@
 """
 INITIAL REPRESENTATION OF THE DATA FROM CSV FILE & PLOTTING HISTOGRAMS
 21/11/18
-SOPHIE MARTIN
+@author: SOPHIE MARTIN
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,7 +34,7 @@ fig, (ax1, ax2) = plt.subplots(2,1, figsize=(8,15))
 fig.subplots_adjust(hspace=0.5)
 ax1.bar(time_centers, time_freq, width=widths_time, color='orange')
 ax1.set_ylabel('Number of entries',  fontsize=15)
-ax1.set_xlabel('Time ($p$s)',  fontsize=15)
+ax1.set_xlabel('time ($p$s)',  fontsize=15)
 ax1.set_title('Histogram of times measured')
 ax1.grid()
 
@@ -53,7 +53,7 @@ plt.figure()
 plt.bar(time_centers, time_freq, width=widths_time, color='orange',label='data')
 plt.plot(time_centers, hist_fit_fm, label='F$^m$(t) Fit', lw=1, color='purple')
 plt.ylabel('Number of entries', fontsize=15)
-plt.xlabel('Time ($p$s)', fontsize=15)
+plt.xlabel('time ($p$s)', fontsize=15)
 plt.grid()
 plt.title('Histogram of times with F$^m$(t) scipy fit')
 plt.legend(prop={'size': 14})

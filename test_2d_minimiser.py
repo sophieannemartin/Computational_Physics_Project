@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Mon Dec 10 22:54:43 2018
-
-@author: sophie
+TESTING THE 2D MINIMISATION ALGORITHM ON A WELL DEFINED TEST CASE
+10/12/18
+@author: SOPHIE MARTIN
 """
 
 import numpy as np
@@ -11,11 +9,12 @@ import matplotlib.pyplot as plt
 import minimiser
 from matplotlib.pyplot import cm
 from mpl_toolkits.mplot3d import Axes3D
+import time
     
     
 def test_f(x,y):
     
-    # A test function (can plot in 3D) with a max/min at (1,2)
+    # A test function (can plot in 3D) with a max/min at (0,0)
     f = x**2 + y**2
     return f
 
@@ -47,8 +46,6 @@ def main():
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     ax.set_title('Testing the Quasi-Newton 2D minimiser')
-    
-    plt.show()
     
     
 if __name__ == "__main__":

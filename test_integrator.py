@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Sat Dec 15 14:04:57 2018
-
-@author: sophie
-
-Testing the integrator on a known function 3*x*2
+TESTING THE INTEGRATOR ON A KNOWN FUNCTION 3X^2 
+15/12/18
+@author: SOPHIE MARTIN
 """
 
 import numpy as np

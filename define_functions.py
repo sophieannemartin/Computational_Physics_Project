@@ -79,6 +79,10 @@ class DecayFunction:
     def get_data(self):
         return self.__t__, self.__sigma__
 
+
+    def change_n(self, n):
+        self.__n__ = n
+        
 # ------------------------------------
     # Code for the NLL based on one parameter estimate
 
@@ -128,6 +132,7 @@ class DecayFunction:
     
     def find_2d_nll_value(self, u1, u2):
         
+        # A cannot be larger than 1
         if u2 > 1:
             sys.exit('invalid a')
             
@@ -135,10 +140,9 @@ class DecayFunction:
         nll = 0
         
         for i in range(self.__n__): # 0 to n-1 instead of 1 to n
-            nll += -np.log(self.signal_and_background(self.__t__[i], 
+            nll += np.log(self.signal_and_background(self.__t__[i], 
                                                       self.__sigma__[i], u1, u2))
-        return nll
-    
-    
+        return -nll
+
 
 # ----------------------------------

@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Dec  4 11:35:07 2018
-
 PLOTTING THE NLL FIT AS A FUNCTION OF TAU
-
-@author: sophie
+04/12/18
+@author: SOPHIE MARTIN
 """
 
 import define_functions as f
@@ -24,19 +20,23 @@ def main():
     decayfunction = f.DecayFunction()
     nll_values = decayfunction.get_nll_values(taus_range)
     
+    # Find the value of the minimum
     minimum, iterations, x3_list = minimiser.minimise_1D(
             taus_range, decayfunction.get_nll_values, maxiter=1000)
     
     nll_mins = []
     
+    # Compute the value of the NLL found from each iteration value x3
     for tau in x3_list:
-        val = decayfunction.find_nll_value(tau)
+        val = decayfunction.get_nll_values(tau)
         nll_mins.append(val)
     
+    # Calculates an error using the value of the NLL with a shift of 0.5
     print('Calculating standard deviation using interpolation...')
-    root1, root2 = minimiser.find_standard_deviation(minimum, taus_range, 
+    root1, root2 = minimiser.find_standard_deviation(minimum, 
                                                          decayfunction.get_nll_values)
     
+    # Calculates the std dev using the curvature of the previous value
     gauss_sigma = minimiser.gauss_standard_deviation(x3_list, 
                                                     decayfunction.get_nll_values)
     
@@ -48,33 +48,34 @@ def main():
     plt.plot(taus_range, nll_values)
     plt.plot(x3_list[:-1], nll_mins[:-1], '.', color='red', label='Minimum iterations')
     plt.plot(x3_list[-1], nll_mins[-1], '.', color='green', label='Minimum found')
-    plt.xlabel('tau')
-    plt.ylabel('NLL value')
+    plt.xlabel('$\\tau$ (ps)', fontsize=15)
+    plt.ylabel('NLL value', fontsize=15)
     plt.grid()
-    plt.title('NLL(tau)')
-    plt.legend()
+    plt.title('NLL($\\tau$)')
+    plt.legend(prop={'size':14})
     
+
     plt.figure(2)
     plt.plot(taus_range, nll_values)
-    plt.xlabel('tau')
-    plt.ylabel('NLL value')
+    plt.xlabel('$\\tau$ (ps)', fontsize=15)
+    plt.ylabel('NLL value', fontsize=15)
     plt.grid()
-    plt.title('NLL(tau)')
+    plt.title('NLL($\\tau$)')
     
     smaller_range = np.linspace(0.2, 0.8, 1000)
     nll_2 = decayfunction.get_nll_values(smaller_range)
     
     plt.figure(3)
     plt.plot(smaller_range, nll_2)
-    plt.plot(x3_list[:-1], nll_mins[:-1], '.', color='red', label='Minimum iterations')
-    plt.plot(x3_list[-2], nll_mins[-2], '.', color='green', label='Minimum found')
-    plt.xlabel('tau')
-    plt.ylabel('NLL value')
+    plt.plot(x3_list[:-2], nll_mins[:-2], '.', color='red', label='Minimum iterations')
+    plt.plot(x3_list[-1], nll_mins[-1], '.', color='green', label='Minimum found')
+    plt.xlabel('$\\tau$ (ps)', fontsize=15)
+    plt.ylabel('NLL value', fontsize=15)
+    plt.title('NLL($\\tau$) near minimum')
     plt.grid()
-    plt.title('NLL(tau) near minimum')
-    plt.legend()
-    plt.xlim(0.395,0.42)
-    plt.ylim(2695, 2712)
+    plt.xlim(0.38,0.43)
+    plt.ylim(6215,6240)
+    plt.legend(prop={'size':14})
     plt.show()
 
     return minimum, iterations, x3_list

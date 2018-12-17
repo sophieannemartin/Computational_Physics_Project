@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Dec 11 18:28:12 2018
-
-@author: sophie
+MINIMISATION USING THE 2D QUASI-NEWTON ALGORITHM
+01/12/18
+@author: SOPHIE MARTIN
 """
 
 import define_functions as f
@@ -23,38 +21,41 @@ def main():
     decayfunction = f.DecayFunction()
 
     # Useful to find the initial guess
-    taus_range = np.linspace(0.4, 0.5, 20)
+    taus_range = np.linspace(0.2, 0.5, 50)
     
     # alpha cannot be > 1
-    alpha_range = np.linspace(0.9, 1, 20)
-    
+    alpha_range = np.linspace(0.9, 1, 50)
+
     X, Y = np.meshgrid(taus_range, alpha_range)
     initialtau, initialalpha, zs = minimiser.find_initial_vectorx(taus_range, alpha_range,
                                                                   decayfunction.get_2d_nll_values)
     Z = zs.reshape(X.shape)
 
+    # Returns the minimum vector containing the best value of tau and alpha
     minimum, min_list, iterations = minimiser.minimise_quasi_newton(
             initialtau, initialalpha, decayfunction.find_2d_nll_value, 
-            0.00001, 0.000001, maxiter=500)
+            0.00001, 0.00001, maxiter=500)
     
-
+    error_matrix = minimiser.find_covariance_error(minimum[0], minimum[1],
+                                                   decayfunction.find_2d_nll_value, 0.000001)
+    
+    print('Errors obtained: ', np.sqrt(error_matrix[0,0]), np.sqrt(error_matrix[1,1]))
+    
     # Plotting nll over different tau and alpha to decide on best minimum point
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
     ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)
-    ax.set_xlabel('tau')
-    ax.set_ylabel('alpha')
+    ax.set_xlabel('tau', fontsize=15)
+    ax.set_ylabel('alpha', fontsize=15)
     ax.set_zlabel('NLL value')
     ax.set_title('Plotting the NLL over different alpha and tau')
 
     ax.plot([minimum[0,0]],[minimum[1,0]], [decayfunction.find_2d_nll_value(minimum[0,0], minimum[1,0])],
         markerfacecolor='yellow', markeredgecolor='yellow', marker='o', 
         markersize=3, alpha=1)
-        
     plt.show()
 
-    
     return minimum, min_list, iterations
 
 if __name__ == "__main__":
